@@ -1,0 +1,10 @@
+{
+    "colormap": "viridis",
+    "norm_range": [0, 1],
+    "gate_colors": {
+        "R1": {"value": 0.5, "opacity": 0.7},
+        "S1_l": {"value": "#ff0000", "opacity": 0.8},
+        "B1": 0.3,
+        "P1": "#00ff00"
+    }
+}
