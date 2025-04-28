@@ -13,7 +13,11 @@ dependencies = [
     "matplotlib",
     "beautifulsoup4",
     "lxml",
+    "PyQt6",
+    "PyQt6-Qt6",
+    "cairosvg",
 ]
 
 [project.scripts]
 sem-colorer = "sem_colorer.cli:main"
+sem-colorer-gui = "sem_colorer.gui:main"

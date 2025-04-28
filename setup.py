@@ -10,11 +10,14 @@ setup(
     install_requires=[
         'matplotlib',
         'beautifulsoup4',
-        'lxml',  # for xml parsing with beautifulsoup
+        'lxml',
+        'PyQt6',
+        'PyQt6-Qt6',
     ],
     entry_points={
         'console_scripts': [
             'sem-colorer=sem_colorer.cli:main',
+            'sem-colorer-gui=sem_colorer.gui:main',
         ],
     },
     author='Your Name',
