@@ -168,6 +168,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("SEM Colorer")
         self.setMinimumSize(800, 600)
         
+        self.statusBar()
         # Main widget and layout
         main_widget = QWidget()
         self.setCentralWidget(main_widget)
@@ -185,8 +186,11 @@ class MainWindow(QMainWindow):
         self.select_svg_btn.clicked.connect(self.select_svg)
         self.refresh_btn = QPushButton("Refresh Preview")
         self.refresh_btn.clicked.connect(lambda: self.update_preview())
+        self.save_btn = QPushButton("Save")
+        self.save_btn.clicked.connect(self.save_preview)
         file_buttons_layout.addWidget(self.select_svg_btn)
         file_buttons_layout.addWidget(self.refresh_btn)
+        file_buttons_layout.addWidget(self.save_btn)
         
         # Opacity control
         opacity_layout = QHBoxLayout()
@@ -308,6 +312,7 @@ class MainWindow(QMainWindow):
         except Exception as e:
             print(f"Error updating preview: {str(e)}")
             self.svg_label.setText(f"Error: {str(e)}")
+    
     def select_svg(self):
         file_name, _ = QFileDialog.getOpenFileName(
             self,
@@ -324,6 +329,64 @@ class MainWindow(QMainWindow):
             self.color_editor.set_default_json(gates)
             
             self.update_preview()
+    def save_preview(self):
+        if not self.svg_path:
+            self.statusBar().showMessage("No SVG file loaded", 3000)
+            return
+                
+        file_name, selected_filter = QFileDialog.getSaveFileName(
+            self,
+            "Save Preview",
+            "",
+            "SVG Files (*.svg);;PNG Files (*.png)"
+        )
+        
+        if not file_name:
+            return
+            
+        try:
+            preview_path = Path(self.temp_dir.name) / "preview.svg"
+            print(f"Preview path exists: {preview_path.exists()}")
+            print(f"Saving to: {file_name}")
+            
+            if file_name.endswith('.svg'):
+                # For SVG, just copy the preview file
+                import shutil
+                print(f"Copying from {preview_path} to {file_name}")
+                shutil.copy2(str(preview_path), str(file_name))
+                print("Copy completed")
+                
+            elif file_name.endswith('.png'):
+                # For PNG, use Inkscape to convert with current preview dimensions
+                label_size = self.preview_label.size()
+                print(f"Converting to PNG with size {label_size.width()}x{label_size.height()}")
+                result = subprocess.run([
+                    'inkscape',
+                    '--export-type=png',
+                    f'--export-width={label_size.width()}',
+                    f'--export-height={label_size.height()}',
+                    '--export-background-opacity=0',
+                    '--export-filename=' + str(file_name),
+                    str(preview_path)
+                ], check=True, capture_output=True, text=True)
+                print(f"Inkscape output: {result.stdout}")
+                
+            # Verify the file was created
+            output_path = Path(file_name)
+            if output_path.exists():
+                self.statusBar().showMessage(f"Saved to {file_name}", 3000)
+                print(f"File successfully saved to {file_name}")
+            else:
+                raise FileNotFoundError(f"Output file {file_name} was not created")
+                
+        except Exception as e:
+            error_msg = f"Error saving preview: {str(e)}"
+            print(error_msg)
+            if isinstance(e, subprocess.CalledProcessError):
+                print(f"Inkscape stderr: {e.stderr}")
+            self.statusBar().showMessage(error_msg, 5000)
+
+    
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self.update_preview()

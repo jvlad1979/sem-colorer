@@ -7,14 +7,51 @@ import json
 from pathlib import Path
 import matplotlib.colors as mcolors
 from matplotlib.cm import ScalarMappable
+import subprocess
 
-# class SEM:
-#     def __init__(self, gates : list[str], layers : list[str], gate_data_intensity : dict[str, float | tuple[float, float]]):
-#         pass
+import numpy as np
 
-# class SVGColorer:
-#     def __init__(self, ):
-#         pass
+def get_voltages_from_npz(npz_file: str | Path) -> dict:
+    """Get voltages from NPZ file."""
+    data = np.load(npz_file)
+    return {key: float(data[key]) for key in data.keys()}
+
+def map_suffixless_to_suffixed(original_dict: dict, all_keys: list[str]) -> dict:
+    """Maps values from suffixless keys to suffixed keys."""
+    new_dict = {}
+    suffixes = ["_l", "_r", "_full", ""]
+
+    for key, value in original_dict.items():
+        base_key = key.split('_')[0]
+        if base_key in [k.split('_')[0] for k in all_keys if '_' in k] or base_key in [k for k in all_keys if '_' not in k]:
+            for suffix in suffixes:
+                new_key = base_key + suffix
+                if new_key in all_keys:
+                    new_dict[new_key] = float(value)
+    return new_dict
+
+def generate_color_spec_from_npz(
+    npz_file: str | Path,
+    svg_file: str | Path,
+    colormap: str = "viridis",
+    norm_range: tuple[float, float] = (0, 1),
+    opacity: float = 0.7
+) -> dict:
+    """Generate color specification from NPZ file."""
+    gates = get_svg_gates(svg_file)
+    voltages = get_voltages_from_npz(npz_file)
+    mapped_voltages = map_suffixless_to_suffixed(voltages, gates)
+    
+    return {
+        "colormap": colormap,
+        "norm_range": list(norm_range),
+        "gate_colors": {
+            gate: {
+                "value": mapped_voltages.get(gate, 0.5),
+                "opacity": opacity
+            } for gate in gates
+        }
+    }
 
 
 def get_svg_gates(svg_path: str | Path) -> list[str]:
@@ -39,6 +76,8 @@ def svg_gate_colorer(
     svg_target: str | Path | None = None,
     color_spec: str | dict | None = None,
     fill_opacity: float = 0.5,
+    export_png: bool = False,
+    png_size: tuple[int, int] | None = None
 ):
     """
     Color an SVG file based on specifications.
@@ -48,6 +87,8 @@ def svg_gate_colorer(
         svg_target: Path for output SVG (if None, will append '_colored' to origin name)
         color_spec: Either path to JSON file or dict with color specifications
         fill_opacity: Default opacity for elements without specified opacity
+        export_png: If True, also export a PNG version
+        png_size: Tuple of (width, height) for PNG export. If None, uses SVG size.
     """
     # Handle paths
     svg_origin = Path(svg_origin)
@@ -79,8 +120,8 @@ def svg_gate_colorer(
     # gates = gates + layers
 
     soup = BeautifulSoup(svg_content, "xml")
-    for image in soup.find_all("image"):
-        image.decompose()
+    # for image in soup.find_all("image"):
+    #     image.decompose()
     paths = soup.find_all("path", attrs={"inkscape:label": True})
 
     for path in paths:
@@ -114,11 +155,46 @@ def svg_gate_colorer(
         )
 
     with open(svg_target, "w") as file:
-        # Debug: Print what we're writing
         output = str(soup)
-        print("Writing SVG content (first 100 chars):")
-        print(output[:100])
         file.write(output)
+
+    # Export PNG if requested
+    if export_png:
+        png_path = svg_target.with_suffix('.png')
+        
+        inkscape_args = [
+            'inkscape',
+            '--export-type=png',
+            '--export-background-opacity=0',
+        ]
+        
+        # Add size arguments if specified
+        if png_size:
+            width, height = png_size
+            inkscape_args.extend([
+                f'--export-width={width}',
+                f'--export-height={height}',
+            ])
+            
+        inkscape_args.extend([
+            '--export-filename=' + str(png_path),
+            str(svg_target)
+        ])
+        
+        try:
+            result = subprocess.run(
+                inkscape_args,
+                check=True,
+                capture_output=True,
+                text=True
+            )
+            print(f"PNG exported to {png_path}")
+            return str(svg_target), str(png_path)
+        except subprocess.CalledProcessError as e:
+            print(f"Error exporting PNG: {e.stderr}")
+            return str(svg_target), None
+    
+    return str(svg_target), None
 
 
 def colorbar_helper(sm):
