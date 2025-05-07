@@ -1,0 +1,121 @@
+{
+    "colormap": "gnuplot2_r",
+    "norm_range": [
+        -0.3,
+        0.65
+    ],
+    "gate_colors": {
+        "B1": {
+            "value": 0.2,
+            "opacity": 0.7
+        },
+        "B2": {
+            "value": 0.2,
+            "opacity": 0.7
+        },
+        "B3": {
+            "value": 0.2,
+            "opacity": 0.7
+        },
+        "B4": {
+            "value": 0.2,
+            "opacity": 0.7
+        },
+        "B5": {
+            "value": 0.2,
+            "opacity": 0.7
+        },
+        "B6": {
+            "value": 0.2,
+            "opacity": 0.7
+        },
+        "B7": {
+            "value": 0.2,
+            "opacity": 0.7
+        },
+        "B8": {
+            "value": 0.2,
+            "opacity": 0.7
+        },
+        "B9": {
+            "value": 0.2,
+            "opacity": 0.7
+        },
+        "P1": {
+            "value": 0.2,
+            "opacity": 0.7
+        },
+        "P2": {
+            "value": 0.2,
+            "opacity": 0.7
+        },
+        "P3": {
+            "value": 0.2,
+            "opacity": 0.7
+        },
+        "P4": {
+            "value": 0.2,
+            "opacity": 0.7
+        },
+        "P5": {
+            "value": 0.2,
+            "opacity": 0.7
+        },
+        "P6": {
+            "value": 0.2,
+            "opacity": 0.7
+        },
+        "R1": {
+            "value": 0.2,
+            "opacity": 0.7
+        },
+        "R2": {
+            "value": 0.2,
+            "opacity": 0.7
+        },
+        "R3": {
+            "value": 0.2,
+            "opacity": 0.7
+        },
+        "R4": {
+            "value": 0.2,
+            "opacity": 0.7
+        },
+        "R5": {
+            "value": 0.2,
+            "opacity": 0.7
+        },
+        "S1_full": {
+            "value": -0.05,
+            "opacity": 0.0
+        },
+        "S1_l": {
+            "value": -0.05,
+            "opacity": 0.7
+        },
+        "S1_r": {
+            "value": -0.05,
+            "opacity": 0.7
+        },
+        "S2": {
+            "value": -0.05,
+            "opacity": 0.7
+        },
+        "S3": {
+            "value": -0.05,
+            "opacity": 0.7
+        },
+        "S3_full": {
+            "value": -0.05,
+            "opacity": 0.0
+        },
+        "S4": {
+            "value": -0.05,
+            "opacity": 0.7
+        },
+        "S4_full": {
+            "value": -0.05,
+            "opacity": 0.0
+        }
+    }
+}
